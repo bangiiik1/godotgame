@@ -1,0 +1,37 @@
+name: 📱 Build Android Debug APK
+
+on:
+  workflow_dispatch:  # Запуск вручную — жмёшь "Run workflow" в GitHub
+
+jobs:
+  build-apk:
+    name: 🔧 Build APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛒 Checkout project
+        uses: actions/checkout@v4
+
+      - name: 📥 Download Godot 4.4.1 headless
+        run: |
+          curl -L -o godot.zip https://downloads.tuxfamily.org/godotengine/4.4.1/Godot_v4.4.1-stable_linux.headless.64.zip
+          unzip godot.zip
+          chmod +x Godot_v4.4.1-stable_linux.headless.64
+          mkdir -p ~/.local/share/godot/templates/4.4.1.stable
+
+      - name: 📦 Download Android export templates
+        run: |
+          curl -L -o templates.tpz https://downloads.tuxfamily.org/godotengine/4.4.1/Godot_v4.4.1-stable_export_templates.tpz
+          unzip templates.tpz -d templates
+          cp -r templates/export_templates/* ~/.local/share/godot/templates/4.4.1.stable/
+
+      - name: 🛠️ Export Android Debug APK
+        run: |
+          mkdir -p bin
+          ./Godot_v4.4.1-stable_linux.headless.64 --export-debug "Android" ./bin/game-debug.apk -v
+
+      - name: 📤 Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-apk
+          path: ./bin/game-debug.apk
