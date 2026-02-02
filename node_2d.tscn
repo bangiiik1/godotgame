@@ -1,0 +1,170 @@
+[gd_scene load_steps=11 format=3 uid="uid://b53dx0hwy85om"]
+
+[ext_resource type="Script" uid="uid://cvql70sig6acg" path="res://character_body_2d.gd" id="1_0e48y"]
+[ext_resource type="Texture2D" uid="uid://b3okesxqyhliu" path="res://carsprite.png" id="2_0e48y"]
+[ext_resource type="Texture2D" uid="uid://gektakrdkpsj" path="res://particle.png" id="3_epypp"]
+[ext_resource type="PackedScene" uid="uid://d4ldmk12som6v" path="res://obstacle.tscn" id="4_0hol4"]
+[ext_resource type="Script" uid="uid://bx6ybqla5dflt" path="res://mobilecontrol.gd" id="5_kdubu"]
+[ext_resource type="Texture2D" uid="uid://nljtlp6gybge" path="res://right.png" id="5_q6r6c"]
+
+[sub_resource type="Curve" id="Curve_epypp"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_0hol4"]
+curve = SubResource("Curve_epypp")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_0hol4"]
+particle_flag_disable_z = true
+direction = Vector3(2.08189e-12, 2.08189e-12, 2.08189e-12)
+initial_velocity_min = 20.0
+initial_velocity_max = 20.0
+angular_velocity_min = 20.0
+angular_velocity_max = 20.0
+gravity = Vector3(2.08189e-12, 2.08189e-12, 2.08189e-12)
+scale_curve = SubResource("CurveTexture_0hol4")
+color = Color(0.479183, 0.479183, 0.479183, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0hol4"]
+size = Vector2(30, 20)
+
+[node name="main" type="Node2D"]
+position = Vector2(2.08189e-12, 2.08189e-12)
+
+[node name="world" type="Node2D" parent="."]
+
+[node name="car" type="CharacterBody2D" parent="world"]
+script = ExtResource("1_0e48y")
+
+[node name="point" type="Marker2D" parent="world/car"]
+position = Vector2(-25, 2.08189e-12)
+
+[node name="particles" type="GPUParticles2D" parent="world/car/point"]
+texture = ExtResource("3_epypp")
+process_material = SubResource("ParticleProcessMaterial_0hol4")
+
+[node name="Sprite2D" type="Sprite2D" parent="world/car"]
+position = Vector2(-14, 2.08189e-12)
+texture = ExtResource("2_0e48y")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="world/car"]
+position = Vector2(-14.0001, 0)
+shape = SubResource("RectangleShape2D_0hol4")
+
+[node name="Camera2D" type="Camera2D" parent="world/car"]
+position_smoothing_enabled = true
+
+[node name="StaticBody2D" parent="world" instance=ExtResource("4_0hol4")]
+position = Vector2(207, -2)
+
+[node name="StaticBody2D" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(-231, 354)
+
+[node name="StaticBody2D2" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(772, 213)
+
+[node name="StaticBody2D3" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(624, 385)
+
+[node name="StaticBody2D4" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(113, 440)
+
+[node name="StaticBody2D5" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(303, 89)
+
+[node name="StaticBody2D6" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(-211, 226)
+
+[node name="StaticBody2D7" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(10, 85)
+
+[node name="StaticBody2D8" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(294, 156)
+
+[node name="StaticBody2D9" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(135, 346)
+
+[node name="StaticBody2D10" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(-214, 293)
+
+[node name="StaticBody2D11" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(8, 155)
+
+[node name="StaticBody2D12" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(769, 267)
+
+[node name="StaticBody2D13" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(122, 397)
+
+[node name="StaticBody2D14" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(397, 445)
+
+[node name="StaticBody2D15" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(387, 491)
+
+[node name="StaticBody2D16" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(623, 438)
+
+[node name="StaticBody2D17" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(406, 390)
+
+[node name="StaticBody2D18" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(570, 190)
+
+[node name="StaticBody2D19" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(578, 133)
+
+[node name="StaticBody2D20" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(286, 202)
+
+[node name="StaticBody2D21" parent="world/StaticBody2D" instance=ExtResource("4_0hol4")]
+position = Vector2(417, 330)
+
+[node name="uilayer" type="CanvasLayer" parent="."]
+layer = 10
+offset = Vector2(150, 600)
+transform = Transform2D(1, 0, 0, 1, 150, 600)
+
+[node name="mobilecontrol" type="Control" parent="uilayer"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -85.0
+offset_top = -65.0
+offset_right = -45.0
+offset_bottom = -25.0
+script = ExtResource("5_kdubu")
+
+[node name="left" type="TextureButton" parent="uilayer/mobilecontrol"]
+layout_mode = 0
+offset_left = 50.0
+offset_right = 90.0
+offset_bottom = 40.0
+scale = Vector2(-3, 3)
+texture_normal = ExtResource("5_q6r6c")
+
+[node name="right" type="TextureButton" parent="uilayer/mobilecontrol"]
+layout_mode = 0
+offset_left = 70.0
+offset_right = 110.0
+offset_bottom = 40.0
+scale = Vector2(3, 3)
+texture_normal = ExtResource("5_q6r6c")
+
+[node name="forward" type="TextureButton" parent="uilayer/mobilecontrol"]
+layout_mode = 0
+offset_left = 960.0
+offset_top = 96.0
+offset_right = 992.0
+offset_bottom = 128.0
+rotation = -1.5708
+scale = Vector2(3, 3)
+texture_normal = ExtResource("5_q6r6c")
+
+[node name="brake" type="TextureButton" parent="uilayer/mobilecontrol"]
+layout_mode = 0
+offset_left = 940.0
+offset_right = 980.0
+offset_bottom = 40.0
+rotation = 1.5708
+scale = Vector2(3, 3)
+texture_normal = ExtResource("5_q6r6c")

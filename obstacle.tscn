@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://d4ldmk12som6v"]
+
+[ext_resource type="Texture2D" uid="uid://d0acowipyvei0" path="res://wall.png" id="1_sl1jc"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_0hol4"]
+friction = 0.2
+bounce = 0.8
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_q6r6c"]
+radius = 16.4924
+
+[node name="StaticBody2D" type="StaticBody2D"]
+physics_material_override = SubResource("PhysicsMaterial_0hol4")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_q6r6c")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_sl1jc")
