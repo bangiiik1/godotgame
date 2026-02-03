@@ -1,0 +1,127 @@
+name: Build APK from HTML5
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Create APK
+        run: |
+          mkdir -p app/src/main/assets
+          cp index.html app/src/main/assets/
+          cp *.js app/src/main/assets/ || true
+          cp *.wasm app/src/main/assets/ || true
+          cp *.pck app/src/main/assets/ || true
+
+          cat > app/src/main/AndroidManifest.xml << 'EOL'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+              package="com.html.game">
+              <uses-permission android:name="android.permission.INTERNET" />
+              <application
+                  android:label="My Godot Game"
+                  android:usesCleartextTraffic="true">
+                  <activity
+                      android:name="MainActivity"
+                      android:exported="true"
+                      android:configChanges="orientation|screenSize">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOL
+
+          cat > MainActivity.java << 'EOL'
+          import android.os.Bundle;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import androidx.appcompat.app.AppCompatActivity;
+          public class MainActivity extends AppCompatActivity {
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  WebView webView = new WebView(this);
+                  webView.setWebViewClient(new WebViewClient());
+                  webView.getSettings().setJavaScriptEnabled(true);
+                  webView.loadUrl("file:///android_asset/index.html");
+                  setContentView(webView);
+              }
+          }
+          EOL
+
+          # Установка Gradle
+          wget https://services.gradle.org/distributions/gradle-7.5-bin.zip
+          unzip gradle-7.5-bin.zip
+          export PATH=$PATH:$(pwd)/gradle-7.5/bin
+
+          # Создаём структуру проекта
+          mkdir -p app/build.gradle
+          cat > app/build.gradle << 'EOL'
+          apply plugin: 'com.android.application'
+          android {
+              namespace 'com.html.game'
+              compileSdk 34
+              defaultConfig {
+                  applicationId "com.html.game"
+                  minSdk 21
+                  targetSdk 34
+                  versionCode 1
+                  versionName "1.0"
+              }
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+                  }
+              }
+          }
+          dependencies {
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+          }
+          EOL
+
+          cat > build.gradle << 'EOL'
+          buildscript {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:7.4.2'
+              }
+          }
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          EOL
+
+          cat > gradle.properties << 'EOL'
+          android.useAndroidX=true
+          android.enableJetifier=true
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          EOL
+
+          # Сборка
+          ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          path: app/build/outputs/apk/release/app-release.apk
