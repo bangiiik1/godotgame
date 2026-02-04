@@ -1,0 +1,151 @@
+name: Build APK from HTML5
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup WebView APK Builder
+        run: |
+          # Создаём структуру Android-проекта
+          mkdir -p app/src/main/assets
+          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/java/com/example/game
+
+      - name: Copy game files
+        run: |
+          # Копируем HTML, JS, PCK, WASM в assets
+          cp index.html app/src/main/assets/ || echo "index.html not found"
+          cp *.js app/src/main/assets/ || echo "JS files copied or not found"
+          cp *.wasm app/src/main/assets/ || echo "WASM copied or not found"
+          cp *.pck app/src/main/assets/ || echo "PCK copied or not found"
+
+      - name: Create AndroidManifest.xml
+        run: |
+          cat > app/src/main/AndroidManifest.xml << 'EOL'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+              package="com.example.game">
+              <uses-permission android:name="android.permission.INTERNET" />
+              <application
+                  android:label="My Godot Game"
+                  android:usesCleartextTraffic="true"
+                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:configChanges="orientation|screenSize|keyboardHidden">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOL
+
+      - name: Create MainActivity.java
+        run: |
+          cat > app/src/main/java/com/example/game/MainActivity.java << 'EOL'
+          package com.example.game;
+          import android.os.Bundle;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import androidx.appcompat.app.AppCompatActivity;
+          public class MainActivity extends AppCompatActivity {
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  WebView webView = new WebView(this);
+                  webView.setWebViewClient(new WebViewClient());
+                  webView.getSettings().setJavaScriptEnabled(true);
+                  webView.getSettings().setDomStorageEnabled(true);
+                  webView.loadUrl("file:///android_asset/index.html");
+                  setContentView(webView);
+              }
+          }
+          EOL
+
+      - name: Create build.gradle (Project)
+        run: |
+          cat > build.gradle << 'EOL'
+          buildscript {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:7.4.2'
+              }
+          }
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          task clean(type: Delete) {
+              delete rootProject.buildDir
+          }
+          EOL
+
+      - name: Create build.gradle (App)
+        run: |
+          cat > app/build.gradle << 'EOL'
+          plugins {
+              id 'com.android.application'
+          }
+          android {
+              namespace 'com.example.game'
+              compileSdk 34
+              defaultConfig {
+                  applicationId "com.example.game"
+                  minSdk 21
+                  targetSdk 34
+                  versionCode 1
+                  versionName "1.0"
+              }
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+                  }
+              }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_1_8
+                  targetCompatibility JavaVersion.VERSION_1_8
+              }
+          }
+          dependencies {
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+          }
+          EOL
+
+      - name: Create settings.gradle
+        run: |
+          echo "include ':app'" > settings.gradle
+
+      - name: Download Gradle
+        run: |
+          wget https://services.gradle.org/distributions/gradle-7.5-bin.zip
+          unzip gradle-7.5-bin.zip
+          chmod +x gradle-7.5/bin/gradle
+          export GRADLE_HOME=$(pwd)/gradle-7.5
+          export PATH=$GRADLE_HOME/bin:$PATH
+
+      - name: Build APK
+        run: |
+          ./gradle-7.5/bin/gradle assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          name: game-apk
+          if-no-files-found: error
